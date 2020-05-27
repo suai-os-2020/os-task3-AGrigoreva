@@ -5,6 +5,10 @@
 #define threadcount 11
 HANDLE m;
 HANDLE s[4];
+HANDLE threads[threadcount];
+
+HANDLE semstart;
+HANDLE semend;
 
 using namespace std;
 unsigned int lab3_thread_graph_id() 
@@ -23,7 +27,7 @@ const char* lab3_sequential_threads()
 }
 
 DWORD WINAPI thread_a(LPVOID t)//id=0
-{
+{//1
     for (int i = 0; i < 3; i++) {
         WaitForSingleObject(m, INFINITE);
         cout << "a" << flush;
@@ -33,126 +37,8 @@ DWORD WINAPI thread_a(LPVOID t)//id=0
     return 0;
 }
 
-DWORD WINAPI thread_b(LPVOID t)//id=1
-{
-    for (int i = 0; i < 3; i++) {
-        WaitForSingleObject(m, INFINITE);
-        cout << "b" << flush;
-        ReleaseMutex(m);
-        computation();
-    }
-    return 0;
-}
-
-DWORD WINAPI thread_c(LPVOID t)//id=2
-{
-    for (int i = 0; i < 3; i++) {
-        WaitForSingleObject(m, INFINITE);
-        cout << "c" << flush;
-        ReleaseMutex(m);
-        computation();
-    }
-    return 0;
-}
-
-DWORD WINAPI thread_d(LPVOID t)//id=3
-{
-    for (int i = 0; i < 3; i++) {
-        WaitForSingleObject(m, INFINITE);
-        cout << "d" << flush;
-        ReleaseMutex(m);
-        computation();
-    }
-    return 0;
-}
-
-DWORD WINAPI thread_e(LPVOID t)//id=4
-{
-    for (int i = 0; i < 3; i++) {
-        WaitForSingleObject(m, INFINITE);
-        cout << "e" << flush;
-        ReleaseMutex(m);
-        computation();
-    }
-    return 0;
-}
-
-DWORD WINAPI thread_e_s(LPVOID t)//id=4
-{
-    for (int i = 0; i < 3; i++) {
-        WaitForSingleObject(s[0], INFINITE);
-        WaitForSingleObject(m, INFINITE);
-        cout << "e" << flush;
-        ReleaseMutex(m);
-        computation();
-        ReleaseSemaphore(s[1], 1, 0);
-    }
-    return 0;
-}
-
-DWORD WINAPI thread_f_s(LPVOID t)//id=5
-{
-    for (int i = 0; i < 3; i++) {
-        WaitForSingleObject(s[1], INFINITE);
-        WaitForSingleObject(m, INFINITE);
-        cout << "f" << flush;
-        ReleaseMutex(m);
-        computation();
-        ReleaseSemaphore(s[2], 1, 0);
-    }
-    return 0;
-}
-
-DWORD WINAPI thread_g(LPVOID t)//id=6
-{
-    for (int i = 0; i < 3; i++) {
-        WaitForSingleObject(m, INFINITE);
-        cout << "g" << flush;
-        ReleaseMutex(m);
-        computation();
-    }
-    return 0;
-}
-
-DWORD WINAPI thread_g_s(LPVOID t)//id=6
-{
-    for (int i = 0; i < 3; i++) {
-        WaitForSingleObject(s[2], INFINITE);
-        WaitForSingleObject(m, INFINITE);
-        cout << "g" << flush;
-        ReleaseMutex(m);
-        computation();
-        ReleaseSemaphore(s[3], 1, 0);
-    }
-    return 0;
-}
-
-DWORD WINAPI thread_h(LPVOID t)//id=7
-{
-    for (int i = 0; i < 3; i++) {
-        WaitForSingleObject(m, INFINITE);
-        cout << "h" << flush;
-        ReleaseMutex(m);
-        computation();
-    }
-    return 0;
-}
-
-DWORD WINAPI thread_h_s(LPVOID t)//id=7
-{
-    for (int i = 0; i < 3; i++) {
-        WaitForSingleObject(s[3], INFINITE);
-        WaitForSingleObject(m, INFINITE);
-        cout << "h" << flush;
-        ReleaseMutex(m);
-        computation();
-        ReleaseSemaphore(s[0], 1, 0);
-    }
-    return 0;
-}
-
 DWORD WINAPI thread_i(LPVOID t)//id=8
-{
+{//5
     for (int i = 0; i < 3; i++) {
         WaitForSingleObject(m, INFINITE);
         cout << "i" << flush;
@@ -163,7 +49,7 @@ DWORD WINAPI thread_i(LPVOID t)//id=8
 }
 
 DWORD WINAPI thread_k(LPVOID t)//id=9
-{
+{//5
     for (int i = 0; i < 3; i++) {
         WaitForSingleObject(m, INFINITE);
         cout << "k" << flush;
@@ -173,8 +59,8 @@ DWORD WINAPI thread_k(LPVOID t)//id=9
     return 0;
 }
 
-DWORD WINAPI thread_m(LPVOID t)//id=10
-{
+DWORD WINAPI thread_m(LPVOID t)//id=9
+{//6
     for (int i = 0; i < 3; i++) {
         WaitForSingleObject(m, INFINITE);
         cout << "m" << flush;
@@ -184,55 +70,279 @@ DWORD WINAPI thread_m(LPVOID t)//id=10
     return 0;
 }
 
+DWORD WINAPI thread_f(LPVOID t)//id=5
+{//4
+    for (int i = 0; i < 3; i++) {
+        WaitForSingleObject(s[1], INFINITE);
+        WaitForSingleObject(m, INFINITE);
+        cout << "f" << flush;
+        ReleaseMutex(m);
+        computation();
+       ReleaseSemaphore(s[2], 1, NULL);
+    }
+    return 0;
+}
+
+DWORD WINAPI thread_b(LPVOID t)//id=1
+{//2
+    for (int i = 0; i < 3; i++) {
+        WaitForSingleObject(m, INFINITE);
+        cout << "b" << flush;
+        ReleaseMutex(m);
+        computation();
+    }
+    return 0;
+}
+
+DWORD WINAPI thread_c(LPVOID t)//id=2
+{//1,2
+    for (int i = 0; i < 3; i++) {
+        WaitForSingleObject(m, INFINITE);
+        cout << "c" << flush;
+        ReleaseMutex(m);
+        computation();
+    }
+
+    ReleaseSemaphore(semend, 1, NULL);
+    WaitForSingleObject(semstart, INFINITE);
+
+    for (int i = 0; i < 3; i++) {
+        WaitForSingleObject(m, INFINITE);
+        cout << "c" << flush;
+        ReleaseMutex(m);
+        computation();
+    }
+
+    return 0;
+}
+
+DWORD WINAPI thread_d(LPVOID t)//id=3
+{//1,2,3
+    for (int i = 0; i < 3; i++) {
+        WaitForSingleObject(m, INFINITE);
+        cout << "d" << flush;
+        ReleaseMutex(m);
+        computation();
+    }
+
+    ReleaseSemaphore(semend, 1, NULL);
+    WaitForSingleObject(semstart, INFINITE);
+
+    for (int i = 0; i < 3; i++) {
+        WaitForSingleObject(m, INFINITE);
+        cout << "d" << flush;
+        ReleaseMutex(m);
+        computation();
+    }
+
+    ReleaseSemaphore(semend, 1, NULL);
+    WaitForSingleObject(semstart, INFINITE);
+
+    for (int i = 0; i < 3; i++) {
+        WaitForSingleObject(m, INFINITE);
+        cout << "d" << flush;
+        ReleaseMutex(m);
+        computation();
+    }
+
+    return 0;
+}
+
+DWORD WINAPI thread_e(LPVOID t)//id=4
+{//1,2,3,4
+    for (int i = 0; i < 3; i++) {
+        WaitForSingleObject(m, INFINITE);
+        cout << "e" << flush;
+        ReleaseMutex(m);
+        computation();
+    }
+
+    ReleaseSemaphore(semend, 1, NULL);
+    WaitForSingleObject(semstart, INFINITE);
+
+    for (int i = 0; i < 3; i++) {
+        WaitForSingleObject(m, INFINITE);
+        cout << "e" << flush;
+        ReleaseMutex(m);
+        computation();
+    }
+
+    ReleaseSemaphore(semend, 1, NULL);
+    WaitForSingleObject(semstart, INFINITE);
+
+    for (int i = 0; i < 3; i++) {
+        WaitForSingleObject(m, INFINITE);
+        cout << "e" << flush;
+        ReleaseMutex(m);
+        computation();
+    }
+
+    ReleaseSemaphore(semend, 1, NULL);
+    WaitForSingleObject(semstart, INFINITE);
+
+    for (int i = 0; i < 3; i++) {
+        WaitForSingleObject(s[0], INFINITE);
+        WaitForSingleObject(m, INFINITE);
+        cout << "e" << flush;
+        ReleaseMutex(m);
+        computation();
+        ReleaseSemaphore(s[1], 1, NULL);
+    }
+
+    return 0;
+}
+
+DWORD WINAPI thread_g(LPVOID t)//id=6
+{//3,4
+    for (int i = 0; i < 3; i++) {
+        WaitForSingleObject(m, INFINITE);
+        cout << "g" << flush;
+        ReleaseMutex(m);
+        computation();
+    }
+
+    ReleaseSemaphore(semend, 1, NULL);
+    WaitForSingleObject(semstart, INFINITE);
+
+    for (int i = 0; i < 3; i++) {
+        WaitForSingleObject(s[2], INFINITE);
+        WaitForSingleObject(m, INFINITE);
+        cout << "g" << flush;
+        ReleaseMutex(m);
+        computation();
+        ReleaseSemaphore(s[3], 1, NULL);
+    }
+    return 0;
+}
+
+DWORD WINAPI thread_h(LPVOID t)//id=7
+{//3,4,5
+    for (int i = 0; i < 3; i++) {
+        WaitForSingleObject(m, INFINITE);
+        cout << "h" << flush;
+        ReleaseMutex(m);
+        computation();
+    }
+
+    ReleaseSemaphore(semend, 1, NULL);
+    WaitForSingleObject(semstart, INFINITE);
+
+    for (int i = 0; i < 3; i++) {
+        WaitForSingleObject(s[3], INFINITE);
+        WaitForSingleObject(m, INFINITE);
+        cout << "h" << flush;
+        ReleaseMutex(m);
+        computation();
+        ReleaseSemaphore(s[0], 1, NULL);
+    }
+
+    ReleaseSemaphore(semend, 1, NULL);
+    WaitForSingleObject(semstart, INFINITE);
+
+    for (int i = 0; i < 3; i++) {
+        WaitForSingleObject(m, INFINITE);
+        cout << "h" << flush;
+        ReleaseMutex(m);
+        computation();
+    }
+
+    return 0;
+}
+
+void control_threads()
+{
+    //////////такт 1
+    //создание потоков cade
+    threads[0] = CreateThread(NULL, 0, thread_a, NULL, 0, NULL);
+    threads[2] = CreateThread(NULL, 0, thread_c, NULL, 0, NULL);
+    threads[3] = CreateThread(NULL, 0, thread_d, NULL, 0, NULL);
+    threads[4] = CreateThread(NULL, 0, thread_e, NULL, 0, NULL);
+
+    //ожидание окончания потока а
+    WaitForSingleObject(threads[0], INFINITE);
+
+    //ожидание окончания части потоков c d e
+    WaitForSingleObject(semend, INFINITE);
+    WaitForSingleObject(semend, INFINITE);
+    WaitForSingleObject(semend, INFINITE);
+
+    /////////такт 2
+    //разрешение потокам c d e работать дальше
+    ReleaseSemaphore(semstart, 3, NULL);
+
+    //создание потока b
+    threads[1] = CreateThread(NULL, 0, thread_b, NULL, 0, NULL);
+
+    //ожидание окончания потока с
+    WaitForSingleObject(threads[2], INFINITE);
+    //ожидание окончания потока b
+    WaitForSingleObject(threads[1], INFINITE);
+
+    //ожидание окончания части потоков d e
+    WaitForSingleObject(semend, INFINITE);
+    WaitForSingleObject(semend, INFINITE);
+
+    //////////такт 3
+    //разрешение двум потокам (d e) работать дальше
+    ReleaseSemaphore(semstart, 2, NULL);
+
+    //создание потоков g h
+    threads[6] = CreateThread(NULL, 0, thread_g, NULL, 0, NULL);
+    threads[7] = CreateThread(NULL, 0, thread_h, NULL, 0, NULL);
+
+    //ожидание окончания потока d
+    WaitForSingleObject(threads[3], INFINITE);
+
+
+    //ожидание окончания части потоков e g h
+    WaitForSingleObject(semend, INFINITE);
+    WaitForSingleObject(semend, INFINITE);
+    WaitForSingleObject(semend, INFINITE);
+
+    ///////такт 4
+    //разрешение трем потокам работать дальше
+    ReleaseSemaphore(semstart, 3, NULL);
+    //создание потока f
+    threads[5] = CreateThread(NULL, 0, thread_f, NULL, 0, NULL);
+    //ожидание окончания потока f
+    WaitForSingleObject(threads[5], INFINITE);
+    //ожидание окончания потока e
+    WaitForSingleObject(threads[4], INFINITE);
+    //ожидание окончания потока g
+    WaitForSingleObject(threads[6], INFINITE);
+
+    //ожидание окончания части h
+    WaitForSingleObject(semend, INFINITE);
+
+    ///////такт 5
+    //разрешение h продолжить работу
+    ReleaseSemaphore(semstart, 1, NULL);
+    //создание потоков k i
+    threads[8] = CreateThread(NULL, 0, thread_i, NULL, 0, NULL);
+    threads[9] = CreateThread(NULL, 0, thread_k, NULL, 0, NULL);
+    //ожидание окончания потока i
+    WaitForSingleObject(threads[8], INFINITE);
+    //ожидание окончания потока k
+    WaitForSingleObject(threads[9], INFINITE);    
+    //ожидание окончания потока h
+    WaitForSingleObject(threads[7], INFINITE);
+
+    ///////такт 6
+    //создание потока m
+    threads[10] = CreateThread(NULL, 0, thread_m, NULL, 0, NULL);
+    //ожидание окончания потока m
+    WaitForSingleObject(threads[10], INFINITE);
+}
+
+
 int lab3_init()
 {    
-    HANDLE threads[threadcount];
+    //инициализация мьютекса
     m = CreateMutex(NULL, false, NULL);
     if (m == NULL) {
         cout << "Create mutex error:" << GetLastError();
         return 1;
     }
-    //моменты времени t0 (потоки acde выполняются параллельно)
-    threads[0] = CreateThread(NULL, 0, thread_a, NULL, 0, NULL);
-    threads[2] = CreateThread(NULL, 0, thread_c, NULL, 0, NULL);
-    threads[3] = CreateThread(NULL, 0, thread_d, NULL, 0, NULL);
-    threads[4] = CreateThread(NULL, 0, thread_e, NULL, 0, NULL);
-    WaitForSingleObject(threads[2], INFINITE);
-    WaitForSingleObject(threads[0], INFINITE);
-    WaitForSingleObject(threads[3], INFINITE);
-    WaitForSingleObject(threads[4], INFINITE);
-    CloseHandle(threads[0]);
-    CloseHandle(threads[2]);
-    CloseHandle(threads[3]);
-    CloseHandle(threads[4]);
-
-    //моменты времени t1 (потоки cbde работают параллельно)
-    threads[2] = CreateThread(NULL, 0, thread_c, NULL, 0, NULL);
-    threads[3] = CreateThread(NULL, 0, thread_d, NULL, 0, NULL);
-    threads[4] = CreateThread(NULL, 0, thread_e, NULL, 0, NULL);
-    threads[1] = CreateThread(NULL, 0, thread_b, NULL, 0, NULL);
-    WaitForSingleObject(threads[2], INFINITE);
-    WaitForSingleObject(threads[3], INFINITE);
-    WaitForSingleObject(threads[4], INFINITE);
-    WaitForSingleObject(threads[1], INFINITE);
-    CloseHandle(threads[1]);
-    CloseHandle(threads[2]);
-    CloseHandle(threads[3]);
-    CloseHandle(threads[4]);
-
-    //моменты времени t2 (потоки hgde работают параллельно)
-    threads[3] = CreateThread(NULL, 0, thread_d, NULL, 0, NULL);
-    threads[4] = CreateThread(NULL, 0, thread_e, NULL, 0, NULL);
-    threads[6] = CreateThread(NULL, 0, thread_g, NULL, 0, NULL);
-    threads[7] = CreateThread(NULL, 0, thread_h, NULL, 0, NULL);
-    WaitForSingleObject(threads[3], INFINITE);
-    WaitForSingleObject(threads[4], INFINITE);
-    WaitForSingleObject(threads[6], INFINITE);
-    WaitForSingleObject(threads[7], INFINITE);
-    CloseHandle(threads[3]);
-    CloseHandle(threads[4]);
-    CloseHandle(threads[6]);
-    CloseHandle(threads[7]);
 
     //инициализация семафоров
     for (int i = 0; i < 4; i++) {
@@ -242,40 +352,19 @@ int lab3_init()
             return 1;
         }
     }
-    //моменты времени t3 (потоки efgh работают строго в этом порядке)
-    threads[4] = CreateThread(NULL, 0, thread_e_s, NULL, 0, NULL);
-    threads[5] = CreateThread(NULL, 0, thread_f_s, NULL, 0, NULL);
-    threads[6] = CreateThread(NULL, 0, thread_g_s, NULL, 0, NULL);
-    threads[7] = CreateThread(NULL, 0, thread_h_s, NULL, 0, NULL);
-    WaitForSingleObject(threads[4], INFINITE);
-    WaitForSingleObject(threads[5], INFINITE);
-    WaitForSingleObject(threads[6], INFINITE);
-    WaitForSingleObject(threads[7], INFINITE);
-    CloseHandle(threads[4]);
-    CloseHandle(threads[5]);
-    CloseHandle(threads[6]);
-    CloseHandle(threads[7]);
-    //моменты времени t4 (потоки hik работают параллельно)
-    threads[7] = CreateThread(NULL, 0, thread_h, NULL, 0, NULL);
-    threads[8] = CreateThread(NULL, 0, thread_i, NULL, 0, NULL);
-    threads[9] = CreateThread(NULL, 0, thread_k, NULL, 0, NULL);
-    WaitForSingleObject(threads[7], INFINITE);
-    WaitForSingleObject(threads[8], INFINITE);
-    WaitForSingleObject(threads[9], INFINITE);
-    CloseHandle(threads[7]);
-    CloseHandle(threads[8]);
-    CloseHandle(threads[9]);
 
-    //мометы времени t5 (работает только поток m)
-    threads[10] = CreateThread(NULL, 0, thread_m, NULL, 0, NULL);
-    WaitForSingleObject(threads[10], INFINITE);
-    CloseHandle(threads[10]);
+    semstart = CreateSemaphore(NULL, 0, 3, NULL);
+    semend = CreateSemaphore(NULL, 0, 3, NULL);
 
+    control_threads();
+    
     CloseHandle(m);
     for (int i = 0; i < 4; i++)
     {
         CloseHandle(s[i]);
     }
+    CloseHandle(semstart);
+    CloseHandle(semend);
 
     return 0;
 }
